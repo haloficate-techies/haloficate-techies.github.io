@@ -1,10 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Welcome to haloficate-techies</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Verification | Toolbox</title>
+
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f9fafb;
+      color: #111827;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+    p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin-top: 10px;
+    }
+    #status {
+      margin-top: 30px;
+      font-size: 1rem;
+      color: #1f2937;
+    }
+    .spinner {
+      margin-top: 20px;
+      width: 40px;
+      height: 40px;
+      border: 5px solid #e5e7eb;
+      border-top: 5px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <h1>Hello World 👋</h1>
-    <p>Welcome to my GitHub Pages site!</p>
+  <h1>Checking Access…</h1>
+  <p>Please hold while we verify your IP address.</p>
+  <div class="spinner"></div>
+  <div id="status"></div>
+
+  <script>
+    (async () => {
+      const statusEl = document.getElementById("status");
+
+      // Ganti ini dengan URL API OVH kamu
+      const apiUrl = "https://cluster051.hosting.ovh.net/api/ip-check.php";
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.allowed && data.loginUrl) {
+          statusEl.textContent = "Access granted. Redirecting...";
+          setTimeout(() => {
+            window.location.href = data.loginUrl;
+          }, 1200);
+        } else {
+          statusEl.textContent = data.reason || "Access denied for this IP address.";
+          statusEl.style.color = "red";
+        }
+      } catch (error) {
+        console.error("Error during IP check:", error);
+        statusEl.textContent = "Unable to verify access right now. Please try again later.";
+        statusEl.style.color = "red";
+      }
+    })();
+  </script>
 </body>
 </html>
